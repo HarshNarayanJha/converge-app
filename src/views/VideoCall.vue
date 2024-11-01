@@ -46,6 +46,7 @@ const setupLocalCamera = async () => {
 
   if (isMounted.value && localStreamVideo.value) {
     localStreamVideo.value.srcObject = localStream
+    localStreamVideo.value.muted = true
   }
 }
 
