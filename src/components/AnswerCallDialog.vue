@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { createReusableTemplate, useMediaQuery } from '@vueuse/core'
-import { ref, useTemplateRef } from 'vue'
+import { ref } from 'vue'
 
 const { onSubmit } = defineProps<{
   onSubmit: (callId: string | undefined) => void
