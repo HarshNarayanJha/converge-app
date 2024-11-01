@@ -22,7 +22,8 @@
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "vue": "^3.5.12",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "vuefire": "^3.2.0"
   },
   "devDependencies": {
     "@iconify/vue": "^4.1.2",

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router';
+import { RouterLink } from 'vue-router'
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/button'
 import { Icon } from '@iconify/vue'
 </script>
 
