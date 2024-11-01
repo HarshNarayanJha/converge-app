@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Button } from './ui/button';
+import { Icon } from '@iconify/vue'
 import ColorToggle from '@/components/ColorToggle.vue';
 </script>
 
@@ -15,6 +17,10 @@ import ColorToggle from '@/components/ColorToggle.vue';
           <li><a class="" href="#">About Us</a></li>
         </ul>
         <div class="hidden xl:flex space-x-5 items-center">
+          <Button>
+            <Icon icon="radix-icons:play" class="h-4 w-2" />
+            Start Video Calls
+          </Button>
           <ColorToggle />
         </div>
       </div>
