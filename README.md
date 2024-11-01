@@ -4,7 +4,7 @@ Connect Anytime, Anywhere
 
 ---
 
-Experience seamless video calls with Converge—your gateway to limitless conversations.
+Experience seamless video calls with Converge — your gateway to limitless conversations.
 
 ## Project Setup
 

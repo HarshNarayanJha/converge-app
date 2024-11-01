@@ -2,12 +2,13 @@
 import { ref, useTemplateRef, onUnmounted, h } from 'vue'
 import { useMounted, useClipboard, useShare } from '@vueuse/core'
 import { useFirestore } from 'vuefire'
-import { collection, doc, addDoc, setDoc, deleteDoc, onSnapshot } from '@firebase/firestore'
+import { collection, doc, addDoc, setDoc, deleteDoc, getDoc, onSnapshot } from '@firebase/firestore'
 import type { DocumentData, DocumentSnapshot, QuerySnapshot, DocumentChange } from '@firebase/firestore'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/components/ui/toast/use-toast'
+import AnswerCallDialog from '@/components/AnswerCallDialog.vue'
 
 const { toast } = useToast()
 const isMounted = useMounted()
@@ -106,12 +107,55 @@ const createCall = async () => {
   })
 }
 
+const joinCall = async () => {
+  const callDoc = doc(collection(db, 'calls'), callId.value)
+  const offerCandidates = collection(db, `calls/${callId.value}/offerCandidates`)
+  const answerCandidates = collection(db, `calls/${callId.value}/answerCandidates`)
+
+  pc.onicecandidate = event => {
+    if (event.candidate) {
+      addDoc(answerCandidates, event.candidate.toJSON())
+    }
+  }
+
+  // Fetch data, then set the offer & answer
+  const callData = (await getDoc(callDoc)).data()
+  if (!callData) return
+
+  const offerDescription = callData.offer
+  await pc.setRemoteDescription(new RTCSessionDescription(offerDescription))
+
+  const answerDescription = await pc.createAnswer()
+  await pc.setLocalDescription(answerDescription)
+
+  const answer = {
+    type: answerDescription.type,
+    sdp: answerDescription.sdp,
+  }
+
+  await setDoc(callDoc, { answer }, { merge: true })
+
+  // Listen to offer candidates
+  onSnapshot(offerCandidates, (snapshot: QuerySnapshot<DocumentData>) => {
+    snapshot.docChanges().forEach((change: DocumentChange<DocumentData>) => {
+      console.log(change)
+      if (change.type === 'added') {
+        const data = change.doc.data()
+        pc.addIceCandidate(new RTCIceCandidate(data))
+      }
+    })
+  })
+}
+
 const startCall = async () => {
   callStarted.value = true
 
   await setupLocalCamera()
   setupRemoteStream()
   await createCall()
+
+
+  copy.copy(callId.value)
 
   toast({
     title: 'Call ID copied to Clipboard!',
@@ -126,8 +170,20 @@ const startCall = async () => {
   })
 }
 
-const joinCall = async () => {
+const answerCall = async (answerCallId: string | undefined) => {
+  if (!answerCallId) return
+
+  callId.value = answerCallId
   callStarted.value = true
+
+  await setupLocalCamera()
+  setupRemoteStream()
+  await joinCall()
+
+  toast({
+    title: 'call Connected!',
+    description: 'Connected to the person who sent you the Call ID'
+  })
 }
 
 // release the streams and delete firestore doc on unmount
@@ -165,7 +221,12 @@ onUnmounted(() => {
 
     <div class="flex justify-center items-center space-x-3 mt-4">
       <Button v-if="!callStarted" @click="startCall" class="py-2 px-4 rounded-lg">Start Video Call</Button>
-      <Button v-if="!callStarted" @click="joinCall" class="py-2 px-4 rounded-lg">Join Video Call</Button>
+
+      <AnswerCallDialog :onSubmit="answerCall">
+        <template #trigger>
+          <Button v-if="!callStarted" class="py-2 px-4 rounded-lg">Answer Video Call</Button>
+        </template>
+      </AnswerCallDialog>
     </div>
   </main>
 </template>
