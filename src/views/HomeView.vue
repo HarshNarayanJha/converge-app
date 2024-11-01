@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { RouterLink } from 'vue-router';
+
 import { Button } from '@/components/ui/button';
 import { Icon } from '@iconify/vue'
 </script>
@@ -13,10 +15,11 @@ import { Icon } from '@iconify/vue'
       Experience seamless video calls with Converge—your gateway to limitless conversations.
     </p>
 
-    <Button class="mt-12">
-      <Icon icon="radix-icons:play"
-        class="h-4 w-2" />
-      Start Video Calls
-    </Button>
+    <RouterLink to="/call">
+      <Button class="mt-12">
+        <Icon icon="radix-icons:play" class="h-4 w-2" />
+        Start Video Call
+      </Button>
+    </RouterLink>
   </main>
 </template>

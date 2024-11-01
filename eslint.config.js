@@ -16,7 +16,9 @@ export default [
   ...vueTsEslintConfig(),
   {
     rules: {
-      'vue/multi-word-component-names': 'off'
+      'vue/multi-word-component-names': 'off',
+      semi: ['error', 'never'],
+      'arrow-parens': ['error', 'as-needed']
     }
   }
 ]

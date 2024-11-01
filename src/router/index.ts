@@ -10,6 +10,11 @@ const router = createRouter({
       component: HomeView
     },
     {
+      path: '/call',
+      name: 'video-call',
+      component: () => import('../views/VideoCall.vue')
+    },
+    {
       path: '/about',
       name: 'about',
       // route level code-splitting
