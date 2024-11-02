@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import { h, onUnmounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useClipboard, useShare } from '@vueuse/core'
@@ -13,6 +14,8 @@ import { useVideoCall } from '@/composables/useVideoCall'
 const copy = useClipboard()
 const share = useShare()
 const { toast } = useToast()
+
+const route = useRoute()
 
 const {
   callId,
@@ -98,6 +101,10 @@ const answerCall = async (answerCallId: string | undefined) => {
 onUnmounted(async () => {
   await cleanup()
 })
+
+if (route.query.callid && typeof route.query.callid === 'string') {
+  answerCall(route.query.callid)
+}
 
 </script>
 
