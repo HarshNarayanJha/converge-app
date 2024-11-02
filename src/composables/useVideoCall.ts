@@ -1,15 +1,15 @@
-import { ref, onUnmounted, h } from 'vue'
-import { useTemplateRef } from 'vue'
-import { useFirestore } from 'vuefire'
-import { useMounted, useClipboard, useShare } from '@vueuse/core'
+import { h, onUnmounted, ref } from 'vue'
+
 import { collection, doc, addDoc, setDoc, deleteDoc, getDoc, onSnapshot } from '@firebase/firestore'
-import type { DocumentData, DocumentSnapshot, QuerySnapshot, DocumentChange } from '@firebase/firestore'
+import type { DocumentChange, DocumentData, DocumentSnapshot, QuerySnapshot } from '@firebase/firestore'
+import { useClipboard, useShare } from '@vueuse/core'
+import { useFirestore } from 'vuefire'
+
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/toast/use-toast'
 
 export const useVideoCall = () => {
   const { toast } = useToast()
-  const isMounted = useMounted()
   const db = useFirestore()
   const copy = useClipboard()
   const share = useShare()
@@ -41,11 +41,6 @@ export const useVideoCall = () => {
         pc.addTrack(track, localStream.value!)
       })
     }
-
-    // if (isMounted.value && localStreamVideo.value) {
-    //   localStreamVideo.value.srcObject = localStream
-    //   localStreamVideo.value.muted = true
-    // }
   }
 
   const setupRemoteStream = () => {
@@ -56,10 +51,6 @@ export const useVideoCall = () => {
         remoteStream.value?.addTrack(track)
       })
     }
-
-    // if (isMounted.value && remoteStreamVideo.value) {
-    //   remoteStreamVideo.value.srcObject = remoteStream
-    // }
   }
 
   const createCall = async () => {
@@ -208,8 +199,6 @@ export const useVideoCall = () => {
     localStream,
     remoteStream,
     startCall,
-    answerCall,
-    // localStreamVideo,
-    // remoteStreamVideo
+    answerCall
   }
 }
