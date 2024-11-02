@@ -36,7 +36,7 @@ const handleSubmit = (e: Event) => {
   const formData = new FormData(e.target as HTMLFormElement)
   const callId = formData.get('callid')
   onSubmit(callId?.toString())
-  // isOpen.value = false
+  isOpen.value = false
 }
 </script>
 

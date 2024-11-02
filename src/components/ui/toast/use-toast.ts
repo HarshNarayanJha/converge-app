@@ -2,8 +2,8 @@ import type { Component, VNode } from 'vue'
 import type { ToastProps } from '.'
 import { computed, ref } from 'vue'
 
-const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+const TOAST_LIMIT = 2
+const TOAST_REMOVE_DELAY = 10000
 
 export type StringOrVNode =
   | string
@@ -95,7 +95,7 @@ function dispatch(action: Action) {
         addToRemoveQueue(toastId)
       }
       else {
-        state.value.toasts.forEach((toast) => {
+        state.value.toasts.forEach(toast => {
           addToRemoveQueue(toast.id)
         })
       }
@@ -103,9 +103,9 @@ function dispatch(action: Action) {
       state.value.toasts = state.value.toasts.map(t =>
         t.id === toastId || toastId === undefined
           ? {
-              ...t,
-              open: false,
-            }
+            ...t,
+            open: false,
+          }
           : t,
       )
       break

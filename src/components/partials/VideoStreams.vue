@@ -18,7 +18,7 @@ watch(() => localStream, newStream => {
 }, { immediate: true })
 
 watch(() => remoteStream, newStream => {
-  if (localVideoRef.value && newStream) {
+  if (remoteVideoRef.value && newStream) {
     remoteVideoRef.value.srcObject = newStream
   }
 

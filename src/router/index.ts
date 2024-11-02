@@ -15,6 +15,11 @@ const router = createRouter({
       component: () => import('../views/VideoCall.vue')
     },
     {
+      path: '/works',
+      name: 'works',
+      component: () => import('../views/AboutView.vue')
+    },
+    {
       path: '/about',
       name: 'about',
       // route level code-splitting

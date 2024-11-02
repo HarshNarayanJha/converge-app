@@ -1,21 +1,15 @@
-import { h, onUnmounted, ref } from 'vue'
+import { ref } from 'vue'
 
 import { collection, doc, addDoc, setDoc, deleteDoc, getDoc, onSnapshot } from '@firebase/firestore'
 import type { DocumentChange, DocumentData, DocumentSnapshot, QuerySnapshot } from '@firebase/firestore'
-import { useClipboard, useShare } from '@vueuse/core'
 import { useFirestore } from 'vuefire'
 
-import { Button } from '@/components/ui/button'
-import { useToast } from '@/components/ui/toast/use-toast'
-
 export const useVideoCall = () => {
-  const { toast } = useToast()
+
   const db = useFirestore()
-  const copy = useClipboard()
-  const share = useShare()
 
   const servers = {
-    constceServers: [
+    iceServers: [
       {
         urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
       },
@@ -27,10 +21,8 @@ export const useVideoCall = () => {
   const localStream = ref<MediaStream | null>(null)
   const remoteStream = ref<MediaStream | null>(null)
 
-  // const localStreamVideo = useTemplateRef<HTMLVideoElement>('self-stream')
-  // const remoteStreamVideo = useTemplateRef<HTMLVideoElement>('remote-stream')
-
   const callStarted = ref(false)
+  const callJoined = ref(false)
   const callId = ref<string>('')
 
   const setupLocalCamera = async () => {
@@ -95,6 +87,8 @@ export const useVideoCall = () => {
         }
       })
     })
+
+    callJoined.value = true
   }
 
   const joinCall = async () => {
@@ -128,58 +122,20 @@ export const useVideoCall = () => {
     // Listen to offer candidates
     onSnapshot(offerCandidates, (snapshot: QuerySnapshot<DocumentData>) => {
       snapshot.docChanges().forEach((change: DocumentChange<DocumentData>) => {
-        console.log(change)
         if (change.type === 'added') {
           const data = change.doc.data()
           pc.addIceCandidate(new RTCIceCandidate(data))
         }
       })
     })
+
+    callJoined.value = true
   }
 
-  const startCall = async () => {
-    callStarted.value = true
-
-    await setupLocalCamera()
-    setupRemoteStream()
-    await createCall()
-
-
-    copy.copy(callId.value)
-
-    toast({
-      title: 'Call ID copied to Clipboard!',
-      description: 'Share the ID for the other person to join',
-      action: h(Button, {
-        onClick: () => share.isSupported && share.share(
-          { title: 'Join my Video Call on Converge', text: callId.value, url: location.origin }
-        )
-      }, {
-        default: () => 'Share'
-      })
-    })
-  }
-
-  const answerCall = async (answerCallId: string | undefined) => {
-    if (!answerCallId) return
-
-    callId.value = answerCallId
-    callStarted.value = true
-
-    await setupLocalCamera()
-    setupRemoteStream()
-    await joinCall()
-
-    toast({
-      title: 'call Connected!',
-      description: 'Connected to the person who sent you the Call ID'
-    })
-  }
-
-  // release the streams and delete firestore doc on unmount
-  onUnmounted(() => {
+  const cleanup = async () => {
+    console.log(`Cleanup event!`)
     if (callId.value) {
-      deleteDoc(doc(collection(db, 'calls'), callId.value))
+      await deleteDoc(doc(collection(db, 'calls'), callId.value))
     }
 
     if (localStream.value) {
@@ -191,14 +147,18 @@ export const useVideoCall = () => {
       remoteStream.value.getTracks().forEach(track => track.stop())
       remoteStream.value = null
     }
-  })
+  }
 
   return {
     callStarted,
+    callJoined,
     callId,
     localStream,
     remoteStream,
-    startCall,
-    answerCall
+    setupLocalCamera,
+    setupRemoteStream,
+    createCall,
+    joinCall,
+    cleanup
   }
 }
