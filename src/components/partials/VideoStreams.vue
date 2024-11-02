@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { Icon } from '@iconify/vue'
 
 const { localStream, remoteStream } = defineProps<{
   localStream: MediaStream | null,
@@ -27,18 +28,17 @@ watch(() => remoteStream, newStream => {
 </script>
 
 <template>
-  <div class="flex justify-center items-center space-x-3 my-4">
-    <div class="relative w-[320px] h-[240px] bg-gray-900 rounded-lg overflow-hidden">
-      <video ref="localVideoRef" autoplay playsinline class="w-full h-full object-cover"></video>
-      <div v-if="!localStream" class="absolute inset-0 flex items-center justify-center text-white">
-        Waiting for camera...
-      </div>
+  <div class="relative w-full xl:w-9/12 xl:h-9/12 bg-gray-900 rounded-lg overflow-clip">
+    <video ref="remoteVideoRef" autoplay playsinline class="w-full h-full object-contain"></video>
+    <div v-if="!remoteStream" class="absolute inset-0 flex items-center justify-center text-white">
+      <Icon icon="radix-icons:person" class="w-8 h-8" />
     </div>
 
-    <div class="relative w-[320px] h-[240px] bg-gray-900 rounded-lg overflow-hidden">
-      <video ref="remoteVideoRef" autoplay playsinline class="w-full h-full object-cover"></video>
-      <div v-if="!remoteStream" class="absolute inset-0 flex items-center justify-center text-white">
-        Waiting for peer...
+    <div ref="localVideoContainer"
+      class="absolute w-[160px] h-[120px] bg-gray-600 rounded-lg overflow-hidden right-6 bottom-5">
+      <video ref="localVideoRef" autoplay playsinline class="w-full h-full object-contain"></video>
+      <div v-if="!localStream" class="absolute inset-0 flex items-center justify-center text-white">
+        <Icon icon="radix-icons:person" class="w-8 h-8" />
       </div>
     </div>
   </div>

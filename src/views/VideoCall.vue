@@ -81,8 +81,8 @@ if (route.query.callid && typeof route.query.callid === 'string') {
 </script>
 
 <template>
-  <main class="h-svh flex flex-col justify-start items-center px-8">
-    <p class="place-self-start font-bold" v-if="callId" @click="() => {
+  <main class="h-svh flex flex-col justify-start items-center px-8 space-y-10">
+    <p class="place-self-start font-bold" v-show="callId" @click="() => {
       if (copy.isSupported.value) {
         copy.copy(callUrl)
         toast({ description: 'Copied!' })
