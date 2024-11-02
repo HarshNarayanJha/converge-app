@@ -1,16 +1,17 @@
 import { initializeApp } from "firebase/app"
 
 const firebaseConfig = {
-  apiKey: "***REMOVED***",
-  authDomain: "***REMOVED***",
-  projectId: "***REMOVED***",
-  storageBucket: "***REMOVED***.firebasestorage.app",
-  messagingSenderId: "***REMOVED***",
-  appId: "1:***REMOVED***:web:ba0d30c24d919b1ab5b0ba",
-  measurementId: "***REMOVED***"
+  apiKey: import.meta.env.VITE_FIREBASE_APIKEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTHDOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECTID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGEBUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGINGSENDERID,
+  appId: import.meta.env.VITE_FIREBASE_APPID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENTID,
 }
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig)
+
+console.log(`Connected to Firebase ${app.name}`)
 
 export { app as firebaseApp }
