@@ -1,10 +1,10 @@
 <script setup lang="ts">
 
-import { h, onUnmounted } from 'vue'
+import { onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useClipboard, useShare } from '@vueuse/core'
+import { useClipboard } from '@vueuse/core'
 import { useToast } from '@/components/ui/toast/use-toast'
 import AnswerCallDialog from '@/components/AnswerCallDialog.vue'
 import VideoStreams from '@/components/partials/VideoStreams.vue'
@@ -12,13 +12,13 @@ import VideoStreams from '@/components/partials/VideoStreams.vue'
 import { useVideoCall } from '@/composables/useVideoCall'
 
 const copy = useClipboard()
-const share = useShare()
 const { toast } = useToast()
 
 const route = useRoute()
 
 const {
   callId,
+  callUrl,
   callStarted,
   callJoined,
   localStream,
@@ -27,6 +27,7 @@ const {
   setupRemoteStream,
   createCall,
   joinCall,
+  toastData,
   cleanup
 } = useVideoCall()
 
@@ -38,36 +39,15 @@ const startCall = async () => {
   await createCall()
 
   if (!callJoined.value) {
-    toast({
-      title: 'Error',
-      description: 'Unable to Start a Video Call',
-      variant: 'destructive'
-    })
-
+    toast({...toastData.callStartErrorData, variant: 'destructive'})
     return
   }
 
   if (copy.isSupported.value) {
-    copy.copy(callId.value)
-
-    toast({
-      title: 'Call ID copied to Clipboard!',
-      description: 'Share the ID for the other person to join',
-      action: h(Button, {
-        onClick: () => {
-          if (share.isSupported.value) {
-            share.share({ title: 'Join my Video Call on Converge', text: callId.value, url: location.origin })
-          } else {
-            console.log("Cannot Share")
-            toast({ description: 'Share is not supported in your browser. Please share the Call ID manually' })
-          }
-        }
-      }, {
-        default: () => 'Share'
-      })
-    })
+    copy.copy(callUrl.value)
+    toast(toastData.callStartToastData())
   } else {
-    toast({ description: 'Copy is not supported in your browser. Please copy the ID manually' })
+    toast({...toastData.copyErrorData, variant: 'destructive'})
   }
 }
 
@@ -82,19 +62,11 @@ const answerCall = async (answerCallId: string | undefined) => {
   await joinCall()
 
   if (!callJoined.value) {
-    toast({
-      title: 'Error',
-      description: 'Unable to Start a Video Call',
-      variant: 'destructive'
-    })
-
+    toast({...toastData.callAnswerErrorData, variant: 'destructive'})
     return
   }
 
-  toast({
-    title: 'Call Connected!',
-    description: 'Connected to the person who sent you the Call ID'
-  })
+  toast(toastData.callConnectedData)
 }
 
 // perform cleanup before unmount
@@ -112,13 +84,13 @@ if (route.query.callid && typeof route.query.callid === 'string') {
   <main class="h-svh flex flex-col justify-start items-center px-8">
     <p class="place-self-start font-bold" v-if="callId" @click="() => {
       if (copy.isSupported.value) {
-        copy.copy(callId)
+        copy.copy(callUrl)
         toast({ description: 'Copied!' })
       } else {
-        toast({ description: 'Copy is not supported in your browser. Please copy the ID manually' })
+        toast({...toastData.copyErrorData, variant: 'destructive'})
       }
     }">
-      Call ID: <Badge>{{ callId }}</Badge>
+      Call: <Badge>{{ callUrl }}</Badge>
     </p>
 
     <VideoStreams :localStream="localStream" :remoteStream="remoteStream" />

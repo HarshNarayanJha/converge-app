@@ -1,12 +1,18 @@
-import { ref } from 'vue'
+import { h, ref } from 'vue'
 
 import { collection, doc, addDoc, setDoc, deleteDoc, getDoc, onSnapshot } from '@firebase/firestore'
 import type { DocumentChange, DocumentData, DocumentSnapshot, QuerySnapshot } from '@firebase/firestore'
 import { useFirestore } from 'vuefire'
+import { computed } from 'vue'
+import { Button } from '@/components/ui/button'
+import { useShare } from '@vueuse/core'
+import { useToast } from '@/components/ui/toast/use-toast'
 
 export const useVideoCall = () => {
 
   const db = useFirestore()
+  const share = useShare()
+  const { toast } = useToast()
 
   const servers = {
     iceServers: [
@@ -24,6 +30,8 @@ export const useVideoCall = () => {
   const callStarted = ref(false)
   const callJoined = ref(false)
   const callId = ref<string>('')
+
+  const callUrl = computed(() => window.location.href + `?callid=${callId.value}`)
 
   const setupLocalCamera = async () => {
     localStream.value = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
@@ -149,16 +157,58 @@ export const useVideoCall = () => {
     }
   }
 
+  const callStartErrorData = {
+    title: 'Error',
+    description: 'Unable to Start a Video Call',
+
+  }
+
+  const copyErrorData = { description: 'Copy is not supported in your browser. Please copy the URL manually' }
+
+  const callStartToastData = () => {
+    return {
+      title: 'Call URL copied to Clipboard!',
+      description: `${callUrl.value}`,
+      action: h(Button, {
+        onClick: () => {
+          if (share.isSupported.value) {
+            share.share({ title: 'Join my Video Call on Converge', text: callUrl.value, url: callUrl.value })
+          } else {
+            console.log("Cannot Share")
+            toast({ description: 'Share is not supported in your browser. Please share the Call URL manually' })
+          }
+        }
+      }, {
+        default: () => 'Share'
+      })
+    }
+  }
+
+  const callAnswerErrorData = {
+    title: 'Error',
+    description: 'Unable to Answer the Video Call',
+
+  }
+
+  const callConnectedData = {
+    title: 'Call Connected!',
+    description: 'Connected to the person who sent you the Call URL'
+  }
+
   return {
     callStarted,
     callJoined,
     callId,
+    callUrl,
     localStream,
     remoteStream,
     setupLocalCamera,
     setupRemoteStream,
     createCall,
     joinCall,
+    toastData: {
+      callStartErrorData, callStartToastData, callConnectedData, callAnswerErrorData, copyErrorData
+    },
     cleanup
   }
 }
