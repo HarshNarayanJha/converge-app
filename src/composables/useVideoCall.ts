@@ -5,7 +5,7 @@ import type { DocumentChange, DocumentData, DocumentSnapshot, QuerySnapshot } fr
 import { useFirestore } from 'vuefire'
 import { computed } from 'vue'
 import { Button } from '@/components/ui/button'
-import { useShare } from '@vueuse/core'
+import { useShare, useUrlSearchParams } from '@vueuse/core'
 import { useToast } from '@/components/ui/toast/use-toast'
 
 export const useVideoCall = () => {
@@ -31,7 +31,20 @@ export const useVideoCall = () => {
   const callJoined = ref(false)
   const callId = ref<string>('')
 
-  const callUrl = computed(() => window.location.href + `?callid=${callId.value}`)
+  const callUrl = computed(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (callId.value) {
+      urlParams.set('callid', callId.value)
+
+      const params = useUrlSearchParams('history')
+      params.callid = callId.value
+    }
+
+    const newUrl = new URL(window.location.href)
+    newUrl.search = urlParams.toString()
+
+    return newUrl.toString()
+  })
 
   const setupLocalCamera = async () => {
     localStream.value = await navigator.mediaDevices.getUserMedia({ video: true, audio: true })

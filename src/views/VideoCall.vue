@@ -1,10 +1,9 @@
 <script setup lang="ts">
 
 import { onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useClipboard } from '@vueuse/core'
+import { useClipboard, useUrlSearchParams } from '@vueuse/core'
 import { useToast } from '@/components/ui/toast/use-toast'
 import AnswerCallDialog from '@/components/AnswerCallDialog.vue'
 import VideoStreams from '@/components/partials/VideoStreams.vue'
@@ -14,7 +13,7 @@ import { useVideoCall } from '@/composables/useVideoCall'
 const copy = useClipboard()
 const { toast } = useToast()
 
-const route = useRoute()
+// const route = useRoute()
 
 const {
   callId,
@@ -39,7 +38,7 @@ const startCall = async () => {
   await createCall()
 
   if (!callJoined.value) {
-    toast({...toastData.callStartErrorData, variant: 'destructive'})
+    toast({ ...toastData.callStartErrorData, variant: 'destructive' })
     return
   }
 
@@ -47,7 +46,7 @@ const startCall = async () => {
     copy.copy(callUrl.value)
     toast(toastData.callStartToastData())
   } else {
-    toast({...toastData.copyErrorData, variant: 'destructive'})
+    toast({ ...toastData.copyErrorData, variant: 'destructive' })
   }
 }
 
@@ -62,7 +61,7 @@ const answerCall = async (answerCallId: string | undefined) => {
   await joinCall()
 
   if (!callJoined.value) {
-    toast({...toastData.callAnswerErrorData, variant: 'destructive'})
+    toast({ ...toastData.callAnswerErrorData, variant: 'destructive' })
     return
   }
 
@@ -74,20 +73,21 @@ onUnmounted(async () => {
   await cleanup()
 })
 
-if (route.query.callid && typeof route.query.callid === 'string') {
-  answerCall(route.query.callid)
+const params = useUrlSearchParams('history')
+if (params.callid && typeof (params.callid) === 'string') {
+  answerCall(params.callid)
 }
 
 </script>
 
 <template>
-  <main class="h-svh flex flex-col justify-start items-center px-8 space-y-10">
+  <main class="h-svh flex flex-col justify-start items-center px-8 space-y-10 pb-12">
     <p class="place-self-start font-bold" v-show="callId" @click="() => {
       if (copy.isSupported.value) {
         copy.copy(callUrl)
         toast({ description: 'Copied!' })
       } else {
-        toast({...toastData.copyErrorData, variant: 'destructive'})
+        toast({ ...toastData.copyErrorData, variant: 'destructive' })
       }
     }">
       Call: <Badge>{{ callUrl }}</Badge>
